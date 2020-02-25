@@ -9,4 +9,5 @@ An Android app focused on optimized/performant usage of the OpenJPEG library,
 
 
 
-Credits: JP2 for Android: https://github.com/gemalto/JP2ForAndroid
+Credits: 
+  * JP2 for Android: https://github.com/gemalto/JP2ForAndroid
