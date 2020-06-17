@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity(){
             override fun onGlobalLayout() {
                 imgView.viewTreeObserver.removeGlobalOnLayoutListener(this )
                  val startTime = System.nanoTime().div(1_000_000)
-                // DecodeJp2AsyncTask(imgView).execute()
                  uiScope.launch {
                      val processedImage = async(Dispatchers.Default) { processImage(imgView) }
 
@@ -51,11 +50,12 @@ class MainActivity : AppCompatActivity(){
         } )
     }
 
-    // TODO: Replace AsyncTask below with an efficient coroutine-based implementation of asynchronous work.
+    // TODO: Optimize the coroutine implementation below.
+    // TODO : Add tests for measuring coroutine performance.
 
     // Initial draft of coroutine implementation
 
-   suspend fun processImage(view: ImageView) : Bitmap? {
+    fun processImage(view: ImageView) : Bitmap? {
         val width = view.width
         val height = view.height
 
@@ -89,58 +89,6 @@ class MainActivity : AppCompatActivity(){
             close(`in`)
         }
         return ret
-
-    }
-
-     @SuppressLint("StaticFieldLeak")
-     inner class DecodeJp2AsyncTask(private val view: ImageView) : AsyncTask<Void?, Void?, Bitmap?>() {
-        private val width: Int
-        private val height: Int
-
-         init {
-             width = view.width
-             height = view.height
-         }
-
-         override fun doInBackground(vararg voids: Void? ): Bitmap? {
-            Log.d(TAG, String.format("View resolution: %d x %d", width, height))
-            var ret: Bitmap? = null
-            var `in`: InputStream? = null
-            try {
-                `in` = assets.open("balloon.jp2")
-                val decoder = JP2Decoder(`in`)
-                val header = decoder.readHeader()
-                println("Number of resolutions: " + header.numResolutions)
-                println("Number of quality layers: " + header.numQualityLayers)
-                var skipResolutions = 2
-                var imgWidth = header.width
-                var imgHeight = header.height
-                Log.d(TAG, String.format("JP2 resolution: %d x %d", imgWidth, imgHeight))
-                while (skipResolutions < header.numResolutions) {
-                    imgWidth = imgWidth shr 1
-                    imgHeight = imgHeight shr 1
-                    if (imgWidth < width || imgHeight < height) break else skipResolutions++
-                }
-                //we break the loop when skipResolutions goes over the correct value
-                skipResolutions--
-                Log.d(TAG, String.format("Skipping %d resolutions", skipResolutions))
-                if (skipResolutions > 0) decoder.setSkipResolutions(skipResolutions)
-                ret = decoder.decode()
-                Log.d(TAG, String.format("Decoded at resolution: %d x %d", ret.width, ret.height))
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } finally {
-                close(`in`)
-            }
-            return ret
-        }
-
-        override fun onPostExecute(bitmap: Bitmap?) {
-            if (bitmap != null) {
-                view.setImageBitmap(bitmap)
-            }
-        }
-
 
     }
     
