@@ -10,10 +10,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jp2ssr.R
 import com.gemalto.jp2.JP2Decoder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
@@ -43,11 +40,9 @@ class MainActivity : AppCompatActivity(){
                  val startTime = System.nanoTime().div(1_000_000)
                 // DecodeJp2AsyncTask(imgView).execute()
                  uiScope.launch {
-                     val processedImage = withContext(Dispatchers.Default) {
-                         processImage(imgView)
-                     }
+                     val processedImage = async(Dispatchers.Default) { processImage(imgView) }
 
-                     imgView.setImageBitmap(processedImage)
+                     imgView.setImageBitmap(processedImage.await())
                  }
                  val end = System.nanoTime().div(1_000_000)
                 println("Execution time : " + (end - startTime) + "ms")
@@ -60,7 +55,7 @@ class MainActivity : AppCompatActivity(){
 
     // Initial draft of coroutine implementation
 
-   fun processImage(view: ImageView) : Bitmap? {
+   suspend fun processImage(view: ImageView) : Bitmap? {
         val width = view.width
         val height = view.height
 
