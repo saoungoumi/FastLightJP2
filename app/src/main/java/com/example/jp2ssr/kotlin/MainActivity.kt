@@ -17,18 +17,12 @@ import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
+import kotlin.system.measureTimeMillis
 
 
 class MainActivity : AppCompatActivity(){
 
     private val TAG : String = "MainActivity"
-
-    /*
-     This variable represents the scope that works with the main thread.
-      La variable ci-dessous represente le contexte dans lequel les coroutines qui
-        interagissent avec les elements graphiques(visuels) s'executent.
-     */
-    private val uiScope : CoroutineScope = CoroutineScope(Dispatchers.Main)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,10 +34,11 @@ class MainActivity : AppCompatActivity(){
         imgView.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 imgView.viewTreeObserver.removeGlobalOnLayoutListener(this )
-                 val startTime = System.nanoTime().div(1_000_000)
-                 DecodeJp2AsyncTask(imgView).execute()
-                 val end = System.nanoTime().div(1_000_000)
-                println("Execution time : " + (end - startTime) + "ms")
+
+                val time = measureTimeMillis {
+                    DecodeJp2AsyncTask(imgView).execute()
+                }
+                println("Execution time : " + time + "ms")
 
             }
         } )
