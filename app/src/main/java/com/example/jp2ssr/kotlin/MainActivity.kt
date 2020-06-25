@@ -1,8 +1,6 @@
 package com.example.jp2ssr.kotlin
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -10,10 +8,14 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jp2ssr.R
 import com.gemalto.jp2.JP2Decoder
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
+import kotlin.system.measureTimeMillis
 
 
 class MainActivity : AppCompatActivity(){
@@ -37,14 +39,16 @@ class MainActivity : AppCompatActivity(){
         imgView.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 imgView.viewTreeObserver.removeGlobalOnLayoutListener(this )
-                 val startTime = System.nanoTime().div(1_000_000)
-                 uiScope.launch {
-                     val processedImage = async(Dispatchers.Default) { processImage(imgView) }
+                 val time = measureTimeMillis {
+                     uiScope.launch {
+                         val processedImage = async(Dispatchers.Default) { processImage(imgView) }
 
-                     imgView.setImageBitmap(processedImage.await())
+                         imgView.setImageBitmap(processedImage.await())
+                     }
                  }
-                 val end = System.nanoTime().div(1_000_000)
-                println("Execution time : " + (end - startTime) + "ms")
+
+
+                println("Execution time : " + time + "ms")
 
             }
         } )
