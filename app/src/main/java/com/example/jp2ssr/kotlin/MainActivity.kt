@@ -8,10 +8,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jp2ssr.R
 import com.gemalto.jp2.JP2Decoder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
@@ -41,9 +38,9 @@ class MainActivity : AppCompatActivity(){
                 imgView.viewTreeObserver.removeGlobalOnLayoutListener(this )
                  val time = measureTimeMillis {
                      uiScope.launch {
-                         val processedImage = async(Dispatchers.Default) { processImage(imgView) }
+                         val processedImage = processImage(imgView)
 
-                         imgView.setImageBitmap(processedImage.await())
+                         imgView.setImageBitmap(processedImage)
                      }
                  }
 
@@ -59,7 +56,7 @@ class MainActivity : AppCompatActivity(){
 
     // Initial draft of coroutine implementation
 
-    fun processImage(view: ImageView) : Bitmap? {
+    suspend fun processImage(view: ImageView) : Bitmap? = withContext(Dispatchers.Default){
         val width = view.width
         val height = view.height
 
@@ -92,7 +89,7 @@ class MainActivity : AppCompatActivity(){
         } finally {
             close(`in`)
         }
-        return ret
+        ret
 
     }
     
