@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jp2ssr.R
 import com.gemalto.jp2.JP2Decoder
@@ -38,6 +39,9 @@ class MainActivity : AppCompatActivity(){
                 val time = measureTimeMillis {
                     DecodeJp2AsyncTask(imgView).execute()
                 }
+
+                Toast.makeText(this@MainActivity, "Execution time : " + time + "ms", Toast.LENGTH_LONG)
+                        .show()
                 println("Execution time : " + time + "ms")
 
             }
