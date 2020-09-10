@@ -7,14 +7,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jp2ssr.R
 import com.gemalto.jp2.JP2Decoder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
@@ -40,12 +35,16 @@ class MainActivity : AppCompatActivity(){
                     DecodeJp2AsyncTask(imgView).execute()
                 }
 
-                Toast.makeText(this@MainActivity, "Execution time : " + time + "ms", Toast.LENGTH_LONG)
-                        .show()
                 println("Execution time : " + time + "ms")
 
             }
         } )
+    }
+
+    inline fun <R> executeAndMeasureTimeMillis(block: () -> R): Pair<R, Long> {
+        val start = System.currentTimeMillis()
+        val result = block()
+        return result to (System.currentTimeMillis() - start)
     }
 
     // TODO: Replace AsyncTask below with an efficient coroutine-based implementation of asynchronous work.
@@ -65,16 +64,17 @@ class MainActivity : AppCompatActivity(){
          }
 
          override fun doInBackground(vararg voids: Void? ): Bitmap? {
+             val start = System.currentTimeMillis()
             Log.d(TAG, String.format("View resolution: %d x %d", width, height))
             var ret: Bitmap? = null
             var `in`: InputStream? = null
             try {
-                `in` = assets.open("balloon.jp2")
+                `in` = assets.open("lena-grey.jp2")
                 val decoder = JP2Decoder(`in`)
                 val header = decoder.readHeader()
                 println("Number of resolutions: " + header.numResolutions)
                 println("Number of quality layers: " + header.numQualityLayers)
-                var skipResolutions = 2
+                var skipResolutions = 1
                 var imgWidth = header.width
                 var imgHeight = header.height
                 Log.d(TAG, String.format("JP2 resolution: %d x %d", imgWidth, imgHeight))
@@ -88,7 +88,10 @@ class MainActivity : AppCompatActivity(){
                 Log.d(TAG, String.format("Skipping %d resolutions", skipResolutions))
                 if (skipResolutions > 0) decoder.setSkipResolutions(skipResolutions)
                 ret = decoder.decode()
+                val time = System.currentTimeMillis() - start
                 Log.d(TAG, String.format("Decoded at resolution: %d x %d", ret.width, ret.height))
+                println("Execution time : " + time + "ms")
+
             } catch (e: IOException) {
                 e.printStackTrace()
             } finally {
@@ -101,6 +104,7 @@ class MainActivity : AppCompatActivity(){
             if (bitmap != null) {
                 view.setImageBitmap(bitmap)
             }
+
         }
 
 
