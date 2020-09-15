@@ -41,11 +41,6 @@ class MainActivity : AppCompatActivity(){
         } )
     }
 
-    inline fun <R> executeAndMeasureTimeMillis(block: () -> R): Pair<R, Long> {
-        val start = System.currentTimeMillis()
-        val result = block()
-        return result to (System.currentTimeMillis() - start)
-    }
 
     // TODO: Replace AsyncTask below with an efficient coroutine-based implementation of asynchronous work.
 
@@ -69,7 +64,7 @@ class MainActivity : AppCompatActivity(){
             var ret: Bitmap? = null
             var `in`: InputStream? = null
             try {
-                `in` = assets.open("lena-grey.jp2")
+                `in` = assets.open("boat.jp2")
                 val decoder = JP2Decoder(`in`)
                 val header = decoder.readHeader()
                 println("Number of resolutions: " + header.numResolutions)
